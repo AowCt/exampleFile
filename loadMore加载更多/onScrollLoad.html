@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			html {
+				height: 100%;
+			}
+			body {
+				min-height: 100%;
+				_height: 100%;
+			}
+			li {
+				height: 154px;
+			}
+		</style>
+	</head>
+	<body>
+		<ul class='box'></ul>
+		<div class="loading" style='display: none;'>加载中...</div>
+		<div class="tip" style='display: none;'>已全部加载</div>
+		<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+		<script type="text/javascript">
+			let floor = 1;
+			let body = $('body'), box = $('.box')
+			, boxOffsetT = box.offset().top, screenH = $(window).height();
+			$.ajax({
+				url: './scrolldata.txt',
+				type: 'GET',
+				success: function(res) {
+					let data = JSON.parse(res);
+					scrollLoad(data,floor);
+					scrolling(data,true);
+				}
+			})
+			function scrollLoad(data,floor) {
+				let floorStr = '';
+				for(let i=0,len=data[floor-1].length;i<len;i++) {
+					floorStr += `<li><p>floor: &nbsp;${ data[floor-1][i].floor }</p><p>name: &nbsp;${ data[floor-1][i].name }</p><p>age: &nbsp;${ data[floor-1][i].age }</p></li>`
+				};
+				box.append(floorStr);
+			}
+			
+			function scrolling(data, scrollFlag) {
+				$(window).scroll(function() {
+					if(scrollFlag) {
+						let scrollT = body.scrollTop()
+						, totalHei = boxOffsetT + box.height();
+						if( scrollT > (totalHei - screenH) - 50 ) {
+							scrollFlag = false;
+							$('.loading').css('display','block');
+							if( floor < data.length ) {
+								floor ++;
+		//						console.log(data.length);
+								setTimeout(function() {
+									scrollLoad(data,floor);
+									scrollFlag = true;
+									$('.loading').css('display','none');
+								}, 1000)
+							}else if ( floor == data.length ) {
+//								floor = 6;
+								console.log(data.length);
+								$('.loading').css('display','none');
+								$('.tip').css('display','block');
+							}
+							
+						}
+					}	
+				})
+			}
+		</script>
+	</body>
+</html>
